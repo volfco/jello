@@ -144,6 +144,7 @@ class Schema(JelloTheme):
 
     def __init__(self):
         self._schema_list = []
+        self.dict_style = False
 
     def color_output(self, data):
         if not opts.mono and PYGMENTS_INSTALLED:
@@ -200,7 +201,9 @@ class Schema(JelloTheme):
             self._schema_list.append((path, [],  '//  (array)' if opts.types else ''))
 
             for i, item in enumerate(src):
-                self._schema_gen(item, path=f'{path}[{i}]')
+                # if self.dict_style is True, then we want to return paths like '_["foo"]["bar"][0]' instead of
+                # '_.foo.bar[]'
+                self._schema_gen(item, path=(f'["{path}"][{i}]' if self.dict_style else f'{path}[{i}]'))
 
         elif isinstance(src, dict):
             # print empty curly brackets as first object definition
@@ -208,7 +211,7 @@ class Schema(JelloTheme):
 
             for k, v in src.items():
                 # encapsulate key in brackets if it is not a valid variable name
-                if is_valid_variable_name(k):
+                if not self.dict_style and is_valid_variable_name(k):
                     k = f'.{k}'
                 else:
                     k = f'["{k}"]'
