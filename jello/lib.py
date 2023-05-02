@@ -126,6 +126,19 @@ class JelloTheme:
             }
 
 
+def _schema_type(val):
+    if opts.types:
+        if val == 'true' or val == 'false':
+            return '//  (boolean)'
+        elif val == 'null':
+            return '//  (null)'
+        elif val.replace('.', '', 1).isdigit():
+            return '//  (number)'
+        else:
+            return '//  (string)'
+    return ''
+
+
 class Schema(JelloTheme):
     """Inherits theme and set_colors() from JelloTheme"""
 
@@ -152,12 +165,19 @@ class Schema(JelloTheme):
         formatter = HtmlFormatter(style=JelloStyle, noclasses=True)
         return highlight(data, lexer, formatter)
 
-    def create_schema(self, data):
-        self._schema_gen(data)
-        myschema = '\n'.join(self._schema_list)
+    def create_schema(self, data, base_path="_"):
+        self._schema_gen(data, path=base_path)
+        rows = []
+        for row in self._schema_list:
+            output_row = f'{row[0]} = {row[1]};'
+            if opts.types:
+                output_row = f'{output_row:<66}  {row[2]}'
+
+            rows.append(output_row)
+
         # unsure if this is helpful, but trying to reduce memory footprint by clearing the list
         self._schema_list *= 0
-        return myschema
+        return '\n'.join(rows)
 
     def _schema_gen(self, src, path='_'):
         """
@@ -166,32 +186,14 @@ class Schema(JelloTheme):
         """
         if isinstance(src, list):
             # print empty brackets as first list definition
-            val = '[]'
-            val_type = ''
-            padding = ''
-            if opts.types:
-                val_type = '//   (array)'
-                padding = '  '
-                if len(path) + len(val) + len(val_type) < 76:
-                    padding = ' ' * (76 - (len(path) + len(val) + len(val_type)))
-
-            self._schema_list.append(f'{path} = {val};{padding}{val_type}')
+            self._schema_list.append((path, [],  '//  (array)' if opts.types else ''))
 
             for i, item in enumerate(src):
                 self._schema_gen(item, path=f'{path}[{i}]')
 
         elif isinstance(src, dict):
             # print empty curly brackets as first object definition
-            val = '{}'
-            val_type = ''
-            padding = ''
-            if opts.types:
-                val_type = '//  (object)'
-                padding = '  '
-                if len(path) + len(val) + len(val_type) < 76:
-                    padding = ' ' * (76 - (len(path) + len(val) + len(val_type)))
-
-            self._schema_list.append(f'{path} = {val};{padding}{val_type}')
+            self._schema_list.append((path, '{}', '//  (object)' if opts.types else ''))
 
             for k, v in src.items():
                 # encapsulate key in brackets if it is not a valid variable name
@@ -201,17 +203,7 @@ class Schema(JelloTheme):
                     k = f'["{k}"]'
 
                 if isinstance(v, list):
-                    # print empty brackets as first list definition
-                    val = '[]'
-                    val_type = ''
-                    padding = ''
-                    if opts.types:
-                        val_type = '//   (array)'
-                        padding = '  '
-                        if len(path) + len(val) + len(val_type) < 76:
-                            padding = ' ' * (76 - (len(f'{path}{k}') + len(val) + len(val_type)))
-
-                    self._schema_list.append(f'{path}{k} = {val};{padding}{val_type}')
+                    self._schema_list.append((f'{path}{k}', [],  '//  (array)' if opts.types else ''))
 
                     for i, item in enumerate(v):
                         self._schema_gen(item, path=f'{path}{k}[{i}]')
@@ -221,43 +213,11 @@ class Schema(JelloTheme):
 
                 else:
                     val = json.dumps(v, ensure_ascii=False)
-                    val_type = ''
-                    padding = ''
-                    if opts.types:
-                        if val == 'true' or val == 'false':
-                            val_type = '// (boolean)'
-                        elif val == 'null':
-                            val_type = '//    (null)'
-                        elif val.replace('.', '', 1).isdigit():
-                            val_type = '//  (number)'
-                        else:
-                            val_type = '//  (string)'
-
-                        padding = '  '
-                        if len(path) + len(k) + len(val) + len(val_type) < 76:
-                            padding = ' ' * (76 - (len(path) + len(k) + len(val) + len(val_type)))
-
-                    self._schema_list.append(f'{path}{k} = {val};{padding}{val_type}')
+                    self._schema_list.append((f'{path}{k}', val,  _schema_type(val)))
 
         else:
             val = json.dumps(src, ensure_ascii=False)
-            val_type = ''
-            padding = ''
-            if opts.types:
-                if val == 'true' or val == 'false':
-                    val_type = '// (boolean)'
-                elif val == 'null':
-                    val_type = '//    (null)'
-                elif val.replace('.', '', 1).isdigit():
-                    val_type = '//  (number)'
-                else:
-                    val_type = '//  (string)'
-
-                padding = '  '
-                if len(path) + len(val) + len(val_type) < 76:
-                    padding = ' ' * (76 - (len(path) + len(val) + len(val_type)))
-
-            self._schema_list.append(f'{path} = {val};{padding}{val_type}')
+            self._schema_list.append((path, val, _schema_type(val)))
 
 
 class Json(JelloTheme):
