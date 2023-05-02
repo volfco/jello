@@ -93,10 +93,9 @@ class JelloTheme:
         if env_colors:
             color_list = env_colors.split(',')
 
-        if env_colors and len(color_list) != 4:
-            input_error = True
+            if len(color_list) != 4:
+                input_error = True
 
-        if env_colors:
             for color in color_list:
                 if color not in ['black', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'gray', 'brightblack', 'brightred',
                                  'brightgreen', 'brightyellow', 'brightblue', 'brightmagenta', 'brightcyan', 'white', 'default']:
@@ -369,7 +368,7 @@ def warning_message(message_lines):
 
     Parameters:
 
-        message:   (list) list of string lines
+        message_lines:   (list) list of string lines
 
     Returns:
 
