@@ -19,6 +19,7 @@ try:
     from pygments.lexers.javascript import JavascriptLexer
     from pygments.formatters import Terminal256Formatter
     from pygments.formatters import HtmlFormatter
+
     PYGMENTS_INSTALLED = True
 except Exception:
     PYGMENTS_INSTALLED = False
@@ -97,8 +98,10 @@ class JelloTheme:
                 input_error = True
 
             for color in color_list:
-                if color not in ['black', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'gray', 'brightblack', 'brightred',
-                                 'brightgreen', 'brightyellow', 'brightblue', 'brightmagenta', 'brightcyan', 'white', 'default']:
+                if color not in ['black', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'gray', 'brightblack',
+                                 'brightred',
+                                 'brightgreen', 'brightyellow', 'brightblue', 'brightmagenta', 'brightcyan', 'white',
+                                 'default']:
                     input_error = True
         else:
             color_list = ['default', 'default', 'default', 'default']
@@ -198,7 +201,7 @@ class Schema(JelloTheme):
         """
         if isinstance(src, list):
             # print empty brackets as first list definition
-            self._schema_list.append((path, [],  '//  (array)' if opts.types else ''))
+            self._schema_list.append((path, [], '//  (array)' if opts.types else ''))
 
             for i, item in enumerate(src):
                 # if self.dict_style is True, then we want to return paths like '_["foo"]["bar"][0]' instead of
@@ -217,17 +220,15 @@ class Schema(JelloTheme):
                     k = f'["{k}"]'
 
                 if isinstance(v, list):
-                    self._schema_list.append((f'{path}{k}', [],  '//  (array)' if opts.types else ''))
+                    self._schema_list.append((f'{path}{k}', [], '//  (array)' if opts.types else ''))
 
                     for i, item in enumerate(v):
                         self._schema_gen(item, path=f'{path}{k}[{i}]')
-
                 elif isinstance(v, dict):
                     self._schema_gen(v, path=f'{path}{k}')
-
                 else:
                     val = json.dumps(v, ensure_ascii=False)
-                    self._schema_list.append((f'{path}{k}', val,  _schema_type(val)))
+                    self._schema_list.append((f'{path}{k}', val, _schema_type(val)))
 
         else:
             val = json.dumps(src, ensure_ascii=False)
@@ -365,9 +366,11 @@ def warning_message(message_lines):
         message = next_wrapper.fill(line)
         print(message, file=sys.stderr)
 
+
 def read_file(file_path):
     with open(file_path, 'r') as f:
         return f.read()
+
 
 def pyquery(data, query):
     """Sets options and runs the user's query."""
@@ -418,7 +421,8 @@ def pyquery(data, query):
     warn_options = False
     warn_colors = False
 
-    for option in [opts.compact, opts.raw, opts.lines, opts.nulls, opts.force_color, opts.mono, opts.schema, opts.types]:
+    for option in [opts.compact, opts.raw, opts.lines, opts.nulls, opts.force_color, opts.mono, opts.schema,
+                   opts.types]:
         if not isinstance(option, bool) and option is not None:
             opts.compact = opts.raw = opts.lines = opts.nulls = opts.force_color = opts.mono = opts.schema = opts.types = False
             warn_options = True
@@ -455,7 +459,7 @@ def pyquery(data, query):
     if len(block.body) < 1:
         raise ValueError('No query found.')
 
-    last = ast.Expression(block.body.pop().value)    # assumes last node is an expression
+    last = ast.Expression(block.body.pop().value)  # assumes last node is an expression
     exec(compile(block, '<string>', mode='exec'), scope)
     output = eval(compile(last, '<string>', mode='eval'), scope)
 

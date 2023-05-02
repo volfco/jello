@@ -72,8 +72,8 @@ def print_exception(e=None, data='', query='', response='', ex_type='Runtime'):
         split_length = 10
 
     wrapper = TextWrapper(width=term_width,
-                                initial_indent='',
-                                subsequent_indent=' ' * 12)
+                          initial_indent='',
+                          subsequent_indent=' ' * 12)
     exception_message = wrapper.fill(f'jello:  {ex_type} Exception:  {e.__class__.__name__}') + '\n'
 
     wrapper = TextWrapper(width=term_width,
@@ -150,8 +150,8 @@ def main(data=None, query='_'):
                 print_error(f'jello:  Issue reading data file: {e}')
 
         elif arg.startswith('-') and not arg.startswith('--'):
-             options.extend(arg[1:])
-             arg_section = ''
+            options.extend(arg[1:])
+            arg_section = ''
 
         elif arg.startswith('--'):
             try:
