@@ -179,6 +179,17 @@ class Schema(JelloTheme):
         self._schema_list *= 0
         return '\n'.join(rows)
 
+    def return_schema(self, data, base_path="_"):
+        """
+        Return an un-formatted schema list
+        """
+        self._schema_gen(data, path=base_path)
+
+        s = self._schema_list
+        self._schema_list *= 0
+
+        return s
+
     def _schema_gen(self, src, path='_'):
         """
         Creates a grep-able schema representation of the JSON.
